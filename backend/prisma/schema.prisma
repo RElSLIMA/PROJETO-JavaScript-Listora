@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  nome            String
+  email           String   @unique
+  senha_hash      String
+  itens           Item[]
+  registros_compra PurchaseRecord[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Categoria {
+  id    String @id @default(uuid())
+  nome  String @unique
+  itens Item[]
+}
+
+model Item {
+  id                  String      @id @default(uuid())
+  usuario             User        @relation(fields: [usuarioId], references: [id])
+  usuarioId           String
+  nome                String
+  foto_url            String?
+  categoria           Categoria?  @relation(fields: [categoriaId], references: [id])
+  categoriaId         String?
+  recorrente          Boolean     @default(false)
+  quantidade_atual    Int         @default(0)
+  preco_minimo        Float?
+  preco_maximo        Float?
+  registros_compra    PurchaseRecord[]
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+}
+
+model PurchaseRecord {
+  id           String   @id @default(uuid())
+  item         Item     @relation(fields: [itemId], references: [id])
+  itemId       String
+  usuario      User     @relation(fields: [usuarioId], references: [id])
+  usuarioId    String
+  data         DateTime @default(now())
+  preco_unitario Float
+  quantidade   Int
+  preco_total  Float
+  notas        String?
+  createdAt    DateTime @default(now())
+}
