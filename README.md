@@ -30,7 +30,8 @@ PROJETO-JavaScript-Listora/
 ---
 
 ## 📌 Status
-🔧 Em desenvolvimento — Sprint 0 (configuração do ambiente e setup inicial).
+🔧 Concluído — Sprint 0 (configuração do ambiente e setup inicial).  
+🔧 Em desenvolvimento — Sprint 1 (integração mobile inicial: login e listagem de itens).
 
 ---
 
