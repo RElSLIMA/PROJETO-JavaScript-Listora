@@ -1,37 +1,37 @@
 # 📱 Listora
 
-Aplicativo mobile para controle de compras pessoais.  
-Projeto de aprendizado e portfólio: desenvolvido com **Node.js**, **React Native (Expo)** e **Postgres (Supabase)**.
+Aplicativo **mobile offline** para controle de compras pessoais.  
+Projeto de aprendizado e portfólio: desenvolvido com **React Native (Expo)** e **SQLite**.
 
 ---
 
 ## 🚀 Objetivos do Projeto
-- Criar um sistema para registrar itens, compras e categorias.
-- Comparar preços, gerenciar quantidades e visualizar histórico de compras.
-- Aprender novas tecnologias (Node, React Native, Supabase, CI/CD, Git Flow).
+- Criar um sistema para registrar **itens, compras e categorias**.  
+- Permitir **comparar preços**, **gerenciar quantidades** e visualizar **histórico de compras**.  
+- Aprender e aplicar boas práticas em **React Native**, organização de código e versionamento com Git.  
 
 ---
 
 ## 📂 Estrutura do Repositório
 ```
 PROJETO-JavaScript-Listora/
-├─ backend/     # API em Node.js + Express + Prisma + Supabase
-├─ mobile/      # App em React Native (Expo)
+├─ mobile/       # App mobile em React Native (Expo + SQLite)
 └─ README.md
 ```
 
 ---
 
 ## 🛠️ Tecnologias
-- **Backend**: Node.js, Express, Prisma ORM, Supabase (Postgres)
-- **Mobile**: React Native (Expo)
-- **Outros**: GitHub Actions (CI), ESLint, Prettier
+- **Mobile**: React Native (Expo)  
+- **Banco de dados local**: SQLite (armazenamento offline)  
+- **Outros**: Git, ESLint, Prettier  
 
 ---
 
-## 📌 Status
-🔧 Concluído — Sprint 0 (configuração do ambiente e setup inicial).  
-🔧 Em desenvolvimento — Sprint 1 (integração mobile inicial: login e listagem de itens).
+## 📌 Status do Projeto
+- ✅ **Sprint 0** — Configuração do ambiente e setup inicial (Node.js, Expo, SQLite).  
+- 🔧 **Sprint 1** — Funcionalidade inicial: CRUD de itens no banco local.  
+- ⏳ **Próximos passos** — Histórico de compras, categorias e comparador de preços.  
 
 ---
 
