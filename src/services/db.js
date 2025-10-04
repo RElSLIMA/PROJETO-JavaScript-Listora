@@ -52,16 +52,24 @@ export const getAllItems = async () => {
 export const updateItem = async (id, { nome, quantidade, categoria, naLista }) => {
   const itens = JSON.parse(await AsyncStorage.getItem(ITENS_KEY)) || [];
   const index = itens.findIndex(i => i.id === id);
-  if (index > -1) {
-    itens[index] = {
-      ...itens[index],
-      ...(nome !== undefined ? { nome } : {}),
-      ...(quantidade !== undefined ? { quantidade } : {}),
-      ...(categoria !== undefined ? { categoria } : {}),
-      ...(naLista !== undefined ? { naLista } : {}),
-    };
-    await AsyncStorage.setItem(ITENS_KEY, JSON.stringify(itens));
+  if (index === -1) throw new Error('Item não encontrado');
+
+  if (nome !== undefined) {
+    const nomeExistente = itens.some(
+      (item, i) => i !== index && item.nome.toLowerCase() === nome.toLowerCase()
+    );
+    if (nomeExistente) throw new Error('Já existe outro item com esse nome');
   }
+
+  itens[index] = {
+    ...itens[index],
+    ...(nome !== undefined ? { nome } : {}),
+    ...(quantidade !== undefined ? { quantidade } : {}),
+    ...(categoria !== undefined ? { categoria } : {}),
+    ...(naLista !== undefined ? { naLista } : {}),
+  };
+
+  await AsyncStorage.setItem(ITENS_KEY, JSON.stringify(itens));
 };
 
 export const registrarCompra = async (itemId, quantidadeComprada, valorUnitario = null) => {

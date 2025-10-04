@@ -99,13 +99,33 @@ export default function EstoqueScreen() {
   };
 
   const confirmarEditar = async () => {
-    if(!novoNome.trim()){ showToast('Erro', 'Nome obrigatório'); return; }
+    if (!novoNome.trim()) { 
+      setModalEditar(false);
+      showToast('Erro', 'Nome obrigatório'); 
+      return; 
+    }
+
     const quantidadeNum = parseInt(novaQuantidade);
-    if(isNaN(quantidadeNum) || quantidadeNum < 0){ showToast('Erro', 'Quantidade inválida'); return; }
-    await updateItem(itemEditar.id, { nome: novoNome, categoria: novaCategoria, quantidade: quantidadeNum });
-    setModalEditar(false);
-    showToast('Sucesso', `${novoNome} atualizado`);
-    loadItens();
+    if (isNaN(quantidadeNum) || quantidadeNum < 0) { 
+      setModalEditar(false);
+      showToast('Erro', 'Quantidade inválida'); 
+      return; 
+    }
+
+    try {
+      await updateItem(itemEditar.id, { nome: novoNome, categoria: novaCategoria, quantidade: quantidadeNum });
+      setModalEditar(false);
+      showToast('Sucesso', `${novoNome} atualizado`);
+      loadItens();
+    } catch (error) {
+      setModalEditar(false); 
+      if (error.message.includes('outro item com esse nome')) {
+        showToast('Erro', 'Já existe outro item com esse nome');
+      } else {
+        showToast('Erro', 'Não foi possível atualizar o item');
+        console.log(error);
+      }
+    }
   };
 
   const zerarEstoque = async () => {

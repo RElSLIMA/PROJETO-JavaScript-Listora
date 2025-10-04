@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { 
-  View, TouchableOpacity, Text, StyleSheet, Modal, Animated, Dimensions 
+  View, TouchableOpacity, Text, StyleSheet, Modal, Animated, Dimensions, Image 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { limparTudo } from '../services/db';
@@ -57,24 +57,41 @@ export default function HomeScreen({ navigation }) {
         </Animated.View>
       )}
 
-      <TouchableOpacity
-        style={styles.trash}
-        onPress={() => setModalVisible(true)}>
-        <Ionicons name="trash-sharp" size={30} color="black" />
-      </TouchableOpacity>
+      <View style={styles.header}>
+        <Image 
+          source={require('../../assets/logoListora.png')} 
+          style={{ width: 120, height: 40, resizeMode: 'contain' }} 
+        />
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons name="trash-sharp" size={30} color='#4CAF50'/>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdicionarProduto')}>
-          <Text style={styles.buttonText}>Adicionar Produto</Text>
+          <View style={styles.buttonContent}>
+            <Ionicons name="add-circle-outline" size={24} color="white" style={styles.icon} />
+            <Text style={styles.buttonText}>Adicionar Produto</Text>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ListaCompra')}>
-          <Text style={styles.buttonText}>Lista de Compras</Text>
+          <View style={styles.buttonContent}>
+            <Ionicons name="cart-outline" size={24} color="white" style={styles.icon} />
+            <Text style={styles.buttonText}>Lista de Compras</Text>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Estoque')}>
-          <Text style={styles.buttonText}>Estoque</Text>
+          <View style={styles.buttonContent}>
+            <Ionicons name="cube-outline" size={24} color="white" style={styles.icon} />
+            <Text style={styles.buttonText}>Estoque</Text>
+          </View>
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Criado por: Gabriel Reis</Text>
       </View>
 
       <Modal
@@ -94,7 +111,7 @@ export default function HomeScreen({ navigation }) {
                 style={styles.modalButtonCancelar}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.buttonText}>Não</Text>
+                <Text style={styles.buttonText}>Cancelar</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -114,7 +131,17 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent:'center', alignItems:'center' },
-  trash: { position: 'absolute', top: 40, right: 20 },
+
+  header: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
   buttonsContainer: { width: '80%', justifyContent:'center', alignItems:'center' },
   button: {
     backgroundColor:'#4CAF50',
@@ -125,7 +152,20 @@ const styles = StyleSheet.create({
     marginVertical:10,
     alignItems:'center',
   },
+  buttonContent: { flexDirection: 'row', alignItems: 'center' },
+  icon: { marginRight: 10 },
   buttonText:{ color:'white', fontSize:18, fontWeight:'bold' },
+
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#888',
+    fontSize: 14,
+  },
 
   modalBackground:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', justifyContent:'center', alignItems:'center' },
   modalContainer:{ width:width-40, backgroundColor:'white', borderRadius:10, padding:20 },
