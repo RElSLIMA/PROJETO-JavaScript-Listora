@@ -30,8 +30,8 @@ PROJETO-JavaScript-Listora/
 
 ## 📌 Status do Projeto
 - ✅ **Sprint 0** — Configuração do ambiente e setup inicial (Node.js, Expo, SQLite).  
-- 🔧 **Sprint 1** — Funcionalidade inicial: CRUD de itens no banco local.  
-- ⏳ **Próximos passos** — Histórico de compras, categorias e comparador de preços.  
+- ✅ **Sprint 1** — Funcionalidade inicial: CRUD de itens no banco local.  
+- 🔧 **Sprint 2** — Ajustes e atualizações.   
 
 ---
 
