@@ -24,7 +24,7 @@ PROJETO-JavaScript-Listora/
 │   │   └─ ListaCompraScreen.js
 │   └─ services/               # Serviços e lógica do app
 │       └─ db.js
-├─ App.js                      # Arquivo principal do app
+├─ App.js                      # Arquivo principal do app 
 ├─ package.json                # Dependências e scripts do projeto
 └─ README.md                   # Documentação do projeto
 ```
