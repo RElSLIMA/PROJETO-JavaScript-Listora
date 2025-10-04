@@ -1,53 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
-  View, TextInput, TouchableOpacity, Text, StyleSheet, Alert, FlatList, KeyboardAvoidingView, Platform, ScrollView 
+  View, TextInput, TouchableOpacity, Text, StyleSheet, FlatList, 
+  KeyboardAvoidingView, Platform, Dimensions, Animated, Easing 
 } from 'react-native';
 import { addItem } from '../services/db';
 
+const { width } = Dimensions.get("window");
+
 export default function AdicionarProdutoScreen() {
   const [nome, setNome] = useState('');
-  const [quantidade, setQuantidade] = useState('0');
-  const [valor, setValor] = useState('');
+  const [quantidade, setQuantidade] = useState('');
   const [categoria, setCategoria] = useState('recorrente');
   const [historico, setHistorico] = useState([]);
 
-  const formatarValor = (text) => {
-    // Remove caracteres não numéricos
-    let num = text.replace(/\D/g, '');
-    // Formata como R$
-    num = (parseFloat(num)/100).toFixed(2);
-    return `R$ ${num}`.replace('.', ',');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalDesc, setModalDesc] = useState(null); 
+  const slideAnim = useRef(new Animated.Value(-100)).current;
+
+  const showModal = (title, description) => {
+    setModalTitle(title);
+    setModalDesc(description);
+    setModalVisible(true);
+
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+
+    setTimeout(() => hideModal(), 2000);
+  };
+
+  const hideModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: -100,
+      duration: 300,
+      easing: Easing.in(Easing.ease),
+      useNativeDriver: true,
+    }).start(() => setModalVisible(false));
   };
 
   const handleAdd = async () => {
-    if (!nome.trim()) return Alert.alert('Erro', 'Nome obrigatório');
+    if (!nome.trim()) {
+      showModal('Erro', <Text>Nome obrigatório</Text>);
+      return;
+    }
 
-    const quantidadeNum = parseInt(quantidade);
-    if (isNaN(quantidadeNum) || quantidadeNum < 0) return Alert.alert('Erro', 'Quantidade inválida');
-
-    const valorNum = valor ? parseFloat(valor.replace(/\D/g,'')/100) : null;
+    const quantidadeNum = quantidade === '' ? 0 : parseInt(quantidade);
+    if (isNaN(quantidadeNum) || quantidadeNum < 0) {
+      showModal('Erro', <Text>Quantidade inválida</Text>);
+      return;
+    }
 
     try {
       await addItem({
         nome,
         quantidade: quantidadeNum,
-        valorUnitario: valorNum,
         categoria,
         naLista: false,
       });
 
-      Alert.alert('Sucesso', 'Produto adicionado!');
+      const destino = quantidadeNum === 0 ? "Lista de Compras" : "Estoque";
+      showModal(
+        'Produto adicionado!',
+        <Text>
+          <Text style={{fontWeight:'bold'}}>{nome}</Text> foi adicionado à {destino}
+        </Text>
+      );
 
-      // Atualiza histórico
-      setHistorico([{ nome, quantidade: quantidadeNum, valor: valorNum, categoria }, ...historico]);
+      setHistorico([{ nome, quantidade: quantidadeNum, categoria }, ...historico]);
 
-      // Reseta campos
       setNome('');
-      setQuantidade('0');
-      setValor('');
+      setQuantidade('');
       setCategoria('recorrente');
     } catch (e) {
-      Alert.alert('Erro', e.message);
+      showModal('Erro', <Text>{e.message}</Text>);
     }
   };
 
@@ -56,80 +85,125 @@ export default function AdicionarProdutoScreen() {
       style={{ flex:1 }} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.container}>
+
+        {modalVisible && (
+          <Animated.View style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}>
+            <Text style={styles.modalTitle}>{modalTitle}</Text>
+            <Text style={styles.modalDesc}>{modalDesc}</Text>
+          </Animated.View>
+        )}
+
+        <Text style={styles.label}>Nome</Text>
         <TextInput
           style={styles.input}
-          placeholder="Nome"
+          placeholder="Ex: Margarina, Arroz, Feijão..."
           value={nome}
           onChangeText={setNome}
         />
 
+        <Text style={styles.label}>Quantidade</Text>
         <TextInput
           style={styles.input}
-          placeholder="Quantidade"
+          placeholder="0"
           value={quantidade}
           onChangeText={text => setQuantidade(text.replace(/\D/g,''))}
           keyboardType="numeric"
         />
+        <Text style={styles.infoText}>ℹ️ Quantidade 0 → Lista | Maior que 0 → Estoque</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Valor Unitário (opcional)"
-          value={valor}
-          onChangeText={text => setValor(formatarValor(text))}
-          keyboardType="numeric"
-        />
-
+        <Text style={styles.label}>Frequência de Compra</Text>
         <View style={styles.pickerContainer}>
           <TouchableOpacity 
             style={[styles.pickerButton, categoria==='recorrente' && styles.pickerSelected]} 
             onPress={() => setCategoria('recorrente')}
           >
-            <Text>Recorrente</Text>
+            <Text style={[styles.pickerText, categoria==='recorrente' && styles.pickerTextSelected]}>Recorrente</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.pickerButton, categoria==='esporadico' && styles.pickerSelected]} 
             onPress={() => setCategoria('esporadico')}
           >
-            <Text>Esporádico</Text>
+            <Text style={[styles.pickerText, categoria==='esporadico' && styles.pickerTextSelected]}>Esporádico</Text>
           </TouchableOpacity>
         </View>
+        <Text style={styles.infoText}>
+          {categoria === 'recorrente' 
+            ? 'ℹ️ Produtos que você compra com frequência' 
+            : 'ℹ️ Produtos que você não compra com frequência'}
+        </Text>
 
         <TouchableOpacity style={styles.button} onPress={handleAdd}>
           <Text style={styles.buttonText}>Adicionar</Text>
         </TouchableOpacity>
 
-        <Text style={styles.historicoTitle}>Últimos itens adicionados:</Text>
+        <Text style={styles.historicoTitle}>Últimos produtos adicionados:</Text>
         {historico.length === 0 ? (
-          <Text style={styles.empty}>Nenhum item adicionado nesta sessão</Text>
+          <Text style={styles.empty}>Nenhum produto adicionado nesta sessão</Text>
         ) : (
           <FlatList
             data={historico}
             keyExtractor={(item,index) => index.toString()}
-            renderItem={({item}) => (
-              <View style={styles.historicoItem}>
-                <Text style={{ fontWeight:'bold' }}>{item.nome}</Text>
-                <Text>Quantidade: {item.quantidade}</Text>
-                <Text>Categoria: {item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}</Text>
-                <Text>Valor: {item.valor != null ? `R$ ${item.valor.toFixed(2).replace('.',',')}` : 'Sem registro de valor'}</Text>
-              </View>
-            )}
+            style={{maxHeight:300}}
+            renderItem={({item}) => {
+              const destino = item.quantidade === 0 ? "Lista de Compras" : "Estoque";
+              return (
+                <View style={styles.historicoItem}>
+                  <Text style={styles.itemNome}>🛒 <Text style={{fontWeight:'bold'}}>{item.nome}</Text></Text>
+                  <Text style={styles.itemInfo}>
+                    Qtd: {item.quantidade}  •  {item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}  •  {destino}
+                  </Text>
+                </View>
+              );
+            }}
           />
         )}
-      </ScrollView>
+
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{ flexGrow:1, padding:20 },
+  container:{ flex:1, padding:20 },
+  label:{ fontWeight:'bold', fontSize:14, marginBottom:5 },
   input:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
-  pickerContainer:{ flexDirection:'row', justifyContent:'space-around', marginBottom:20 },
-  pickerButton:{ padding:10, borderWidth:1, borderColor:'#ccc', borderRadius:5 },
-  pickerSelected:{ backgroundColor:'#ddd' },
+  infoText:{ fontSize:12, color:'#666', marginBottom:15 },
+  pickerContainer:{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 },
+  pickerButton:{ 
+    width: (width - 60)/2, 
+    padding:12, 
+    borderWidth:1, 
+    borderColor:'#ccc',  
+    borderRadius:8, 
+    alignItems:'center'
+  },
+  pickerSelected:{ backgroundColor:'#4CAF50', borderColor:'#4CAF50' },
+  pickerText:{ fontSize:14 },
+  pickerTextSelected:{ color:'white', fontWeight:'bold' },
   button:{ backgroundColor:'#4CAF50', padding:15, borderRadius:8, alignItems:'center', marginBottom:20 },
   buttonText:{ color:'white', fontWeight:'bold', fontSize:16 },
   historicoTitle:{ fontWeight:'bold', fontSize:16, marginBottom:10 },
   empty:{ color:'#666', fontStyle:'italic', marginBottom:10 },
-  historicoItem:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 }
+  historicoItem:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
+  itemNome: { fontWeight:'bold', fontSize:18, marginBottom:4 },
+  itemInfo: { fontSize:14, color:'#444' },
+
+  modalContainer:{
+    position:'absolute',
+    top:0,
+    alignSelf:'center',
+    backgroundColor:'white',
+    padding:15,
+    borderRadius:8,
+    width: width - 40,
+    shadowColor:'#000',
+    shadowOffset:{ width:0, height:2 },
+    shadowOpacity:0.3,
+    shadowRadius:4,
+    elevation:5,
+    zIndex:1000
+  },
+  modalTitle:{ fontWeight:'bold', fontSize:16, marginBottom:5 },
+  modalDesc:{ fontSize:14, color:'#444' }
 });

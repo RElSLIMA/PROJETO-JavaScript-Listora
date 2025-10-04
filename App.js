@@ -1,4 +1,5 @@
 import React from 'react';
+import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -12,7 +13,15 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <StatusBar barStyle="light-content" />
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: '#4CAF50' },
+          headerTintColor: '#fff',
+          contentStyle: { backgroundColor: '#fff' },
+          headerTitleAlign: 'center',
+        }}
+      >
         <Stack.Screen
           name="Home"
           component={HomeScreen}
@@ -21,17 +30,17 @@ export default function App() {
         <Stack.Screen
           name="AdicionarProduto"
           component={AdicionarProdutoScreen}
-          options={{ title: 'Adicionar Produto', headerTitleAlign: 'center' }}
+          options={{ title: 'Adicionar Produto' }}
         />
         <Stack.Screen
           name="ListaCompra"
           component={ListaCompraScreen}
-          options={{ title: 'Lista de Compra', headerTitleAlign: 'center' }}
+          options={{ title: 'Lista de Compras' }}
         />
         <Stack.Screen
           name="Estoque"
           component={EstoqueScreen}
-          options={{ title: 'Estoque', headerTitleAlign: 'center' }}
+          options={{ title: 'Estoque' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

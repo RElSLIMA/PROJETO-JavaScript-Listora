@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,137 +6,231 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Modal,
-  Alert,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
+  Animated,
+  Modal
 } from 'react-native';
-import { getAllItems, registrarCompra } from '../services/db';
+import { getAllItems, registrarCompra, updateItem } from '../services/db';
+
+const { width } = Dimensions.get('window');
 
 export default function ListaCompraScreen() {
   const [itens, setItens] = useState([]);
   const [filtro, setFiltro] = useState('todos');
   const [busca, setBusca] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalCompraVisible, setModalCompraVisible] = useState(false);
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [quantidadeCompra, setQuantidadeCompra] = useState('');
   const [valorCompra, setValorCompra] = useState('');
 
-  // Carrega itens da lista de compra
+  const [ordenacao, setOrdenacao] = useState(0);
+
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastTitle, setToastTitle] = useState('');
+  const [toastDesc, setToastDesc] = useState(null);
+  const slideAnim = useRef(new Animated.Value(-100)).current;
+
+  const showToast = (title, message) => {
+    setToastTitle(title);
+    setToastDesc(message);
+    setToastVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    setTimeout(() => hideToast(), 2000);
+  };
+
+  const hideToast = () => {
+    Animated.timing(slideAnim, {
+      toValue: -100,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setToastVisible(false));
+  };
+
   const loadItens = async () => {
     const all = await getAllItems();
-    const listaCompra = all
-      .filter(i => i.quantidade === 0 || i.naLista)
-      .sort((a, b) => parseInt(b.id) - parseInt(a.id)); // mais recente primeiro
+    const listaCompra = all.filter(i => i.naLista === true);
     setItens(listaCompra);
   };
 
-  useEffect(() => {
-    loadItens();
-  }, []);
+  useEffect(() => { loadItens(); }, []);
 
-  // Filtra por categoria e busca
-  const itensFiltrados = itens.filter(i => {
-    const correspondeFiltro =
-      filtro === 'todos' ? true : i.categoria.toLowerCase() === filtro;
-    const correspondeBusca =
-      i.nome.toLowerCase().includes(busca.toLowerCase());
-    return correspondeFiltro && correspondeBusca;
-  });
+  const compararItens = (a, b) => {
+    switch(ordenacao) {
+      case 0: return parseInt(b.id) - parseInt(a.id); 
+      case 1: return parseInt(a.id) - parseInt(b.id); 
+      case 2: return a.nome.localeCompare(b.nome);    
+      case 3: return b.nome.localeCompare(a.nome);  
+      default: return parseInt(b.id) - parseInt(a.id);
+    }
+  };
 
-  // Abre modal para registrar compra
+  const itensFiltrados = itens
+    .filter(i => {
+      const correspondeFiltro = filtro === 'todos' ? true : i.categoria.toLowerCase() === filtro;
+      const correspondeBusca = i.nome.toLowerCase().includes(busca.toLowerCase());
+      return correspondeFiltro && correspondeBusca;
+    })
+    .sort(compararItens);
+
   const abrirModalCompra = (item) => {
     setItemSelecionado(item);
     setQuantidadeCompra('');
     setValorCompra('');
-    setModalVisible(true);
+    setModalCompraVisible(true);
   };
 
-  // Formata valor em Real
   const formatarReal = (valor) => {
     let v = valor.replace(/\D/g, '');
     v = (v/100).toFixed(2) + '';
     v = v.replace('.', ',');
-    v = 'R$ ' + v;
-    return v;
+    return 'R$ ' + v;
   };
 
-  // Atualiza valor com máscara
   const handleValorCompraChange = (text) => {
     const numeric = text.replace(/\D/g, '');
     setValorCompra(formatarReal(numeric));
   };
 
-  // Confirma compra
   const confirmarCompra = async () => {
+    if (!itemSelecionado) {
+      setModalCompraVisible(false);
+      showToast('Erro', <Text>Nenhum item selecionado</Text>);
+      return;
+    }
+
     const quantidadeNum = parseInt(quantidadeCompra);
-    if (isNaN(quantidadeNum) || quantidadeNum <= 0)
-      return Alert.alert('Erro', 'Quantidade inválida');
+    if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
+      setModalCompraVisible(false);
+      showToast('Erro', <Text>Quantidade inválida</Text>);
+      return;
+    }
 
-    const valorNum = valorCompra
-      ? parseFloat(valorCompra.replace(/\D/g, '')) / 100
-      : 0;
+    const valorNum = valorCompra ? parseFloat(valorCompra.replace(/\D/g,''))/100 : 0;
 
-    await registrarCompra(itemSelecionado.id, quantidadeNum, valorNum);
-    setModalVisible(false);
-    loadItens();
+    try {
+      await registrarCompra(itemSelecionado.id, quantidadeNum, valorNum);
+      setModalCompraVisible(false);
+      showToast('Sucesso!', <Text>Produto <Text style={{fontWeight:'bold'}}>{itemSelecionado.nome}</Text> comprado.</Text>);
+      setItemSelecionado(null);
+      setQuantidadeCompra('');
+      setValorCompra('');
+      loadItens();
+    } catch (error) {
+      setModalCompraVisible(false);
+      showToast('Erro', <Text>{error.message}</Text>);
+      console.log(error);
+    }
+  };
+
+  const cancelarCompra = () => {
+    setModalCompraVisible(false);
+  };
+
+  const removerItem = async (item) => {
+    try {
+      await updateItem(item.id, { naLista:false });
+      loadItens();
+      showToast('Sucesso!', <Text>Produto <Text style={{fontWeight:'bold'}}>{item.nome}</Text> removido.</Text>);
+    } catch (error) {
+      showToast('Erro', <Text>Não foi possível remover o item</Text>);
+      console.log(error);
+    }
+  };
+
+  const alternarOrdenacao = () => setOrdenacao((ordenacao + 1) % 4);
+  const textoOrdenacao = () => {
+    switch(ordenacao){
+      case 0: return 'Mais recentes ↑';
+      case 1: return 'Mais antigos ↓';
+      case 2: return 'Alfabético A-Z';
+      case 3: return 'Alfabético Z-A';
+    }
   };
 
   return (
     <KeyboardAvoidingView
       style={{ flex:1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS==='ios' ? 'padding' : undefined}
     >
       <View style={styles.container}>
+
+        {toastVisible && (
+          <Animated.View style={[styles.toastContainer, { transform:[{ translateY: slideAnim }] }]}>
+            <Text style={styles.toastTitle}>{toastTitle}</Text>
+            <Text style={styles.toastDesc}>{toastDesc}</Text>
+          </Animated.View>
+        )}
+
         <TextInput
           style={styles.busca}
-          placeholder="Nunca..."
+          placeholder="Buscar produto..."
           value={busca}
           onChangeText={setBusca}
         />
 
+        <TouchableOpacity style={styles.ordenacaoBtnGrande} onPress={alternarOrdenacao}>
+          <Text style={styles.ordenacaoBtnText}>Ordenar: {textoOrdenacao()}</Text>
+        </TouchableOpacity>
+
         <View style={styles.filtroRow}>
-          <TouchableOpacity style={[styles.filtroBtn, filtro==='todos' && styles.filtroAtivo]} onPress={()=>setFiltro('todos')}><Text>Todos</Text></TouchableOpacity>
-          <TouchableOpacity style={[styles.filtroBtn, filtro==='recorrente' && styles.filtroAtivo]} onPress={()=>setFiltro('recorrente')}><Text>Recorrente</Text></TouchableOpacity>
-          <TouchableOpacity style={[styles.filtroBtn, filtro==='esporadico' && styles.filtroAtivo]} onPress={()=>setFiltro('esporadico')}><Text>Esporádico</Text></TouchableOpacity>
+          {['todos','recorrente','esporadico'].map((f, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={[styles.filtroBtn, filtro===f && styles.filtroAtivo]}
+              onPress={()=>setFiltro(f)}
+            >
+              <Text style={filtro===f ? { color:'white', fontWeight:'bold' } : {}}>
+                {f==='todos'?'Todos':f==='recorrente'?'Recorrente':'Esporádico'}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {itensFiltrados.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.empty}>Lista vazia</Text>
+            <Text style={styles.empty}>{busca ? 'Produto não encontrado' : 'Lista vazia'}</Text>
           </View>
         ) : (
           <FlatList
             data={itensFiltrados}
-            keyExtractor={item => item.id}
+            keyExtractor={item=>item.id}
             renderItem={({ item }) => (
               <View style={styles.item}>
-                <Text style={[styles.itemText, { fontWeight:'bold', fontSize:18 }]}>
-                  {item.nome}
-                </Text>
-
+                <Text style={[styles.itemText,{ fontWeight:'bold', fontSize:18 }]}>{item.nome}</Text>
                 <Text>
                   <Text style={{ fontWeight:'bold' }}>Categoria: </Text>
                   {item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}
                 </Text>
-
                 <Text>
                   <Text style={{ fontWeight:'bold' }}>Valor: </Text>
-                  {item.minValor != null && item.maxValor != null
-                    ? `R$ ${item.minValor.toFixed(2)} - R$ ${item.maxValor.toFixed(2)}`
-                    : 'Sem registro de valor'}
+                  {item.minValor!=null && item.maxValor!=null ? `R$ ${item.minValor.toFixed(2)} - R$ ${item.maxValor.toFixed(2)}` : 'Sem registro de valor'}
                 </Text>
 
-                <TouchableOpacity style={styles.button} onPress={()=>abrirModalCompra(item)}>
-                  <Text style={styles.buttonText}>Comprado</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection:'row', justifyContent:'space-between', marginTop:8 }}>
+                  <TouchableOpacity style={[styles.smallButtonExcluir]} onPress={()=>removerItem(item)}>
+                    <Text style={styles.buttonText}>Remover</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.button]} onPress={()=>abrirModalCompra(item)}>
+                    <Text style={styles.buttonText}>Comprado</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           />
         )}
 
-        {/* Modal de registrar compra */}
-        <Modal visible={modalVisible} transparent animationType="slide">
+        <Modal
+          visible={modalCompraVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={cancelarCompra}
+        >
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
               <Text style={{ fontWeight:'bold', fontSize:18 }}>
@@ -157,11 +251,14 @@ export default function ListaCompraScreen() {
                 style={styles.modalInput}
               />
               <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
-                <TouchableOpacity style={styles.modalButton} onPress={confirmarCompra}>
-                  <Text style={styles.buttonText}>Confirmar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalButton, { backgroundColor:'#f44336' }]} onPress={()=>setModalVisible(false)}>
+                <TouchableOpacity
+                  style={[styles.modalButtonCancelar]}
+                  onPress={cancelarCompra}
+                >
                   <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalButton} onPress={confirmarCompra}>
+                  <Text style={styles.buttonText}>Salvar</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -176,17 +273,50 @@ export default function ListaCompraScreen() {
 const styles = StyleSheet.create({
   container:{ flex:1, padding:20 },
   busca:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
-  filtroRow:{ flexDirection:'row', justifyContent:'space-around', marginBottom:10 },
-  filtroBtn:{ padding:10, borderWidth:1, borderColor:'#ccc', borderRadius:5 },
-  filtroAtivo:{ backgroundColor:'#ddd' },
+  filtroRow:{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 },
+  filtroBtn:{ flex:1, paddingVertical:10, borderWidth:1, borderColor:'#ccc', borderRadius:5, marginHorizontal:5, alignItems:'center' },
+  filtroAtivo:{ backgroundColor:'#4CAF50', borderColor:'#4CAF50'},
   emptyContainer:{ flex:1, justifyContent:'center', alignItems:'center' },
   empty:{ fontSize:18, color:'#666' },
-  item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:10 },
+  item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:12 },
   itemText:{ fontSize:16 },
-  button:{ backgroundColor:'#4CAF50', marginTop:5, padding:10, borderRadius:5, alignItems:'center' },
+  button:{ flex:1, backgroundColor:'#4CAF50', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginLeft:5 },
+  smallButtonExcluir:{ flex:1, backgroundColor:'#f44336', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginRight:5 },
   buttonText:{ color:'white', fontWeight:'bold', textAlign:'center' },
   modalBackground:{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.5)' },
-  modalContainer:{ width:'80%', backgroundColor:'white', padding:20, borderRadius:10 },
+  modalContainer:{ width:width-40, backgroundColor:'white', padding:20, borderRadius:10 },
   modalInput:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginVertical:10 },
-  modalButton:{ flex:1, backgroundColor:'#4CAF50', padding:10, margin:5, borderRadius:5, alignItems:'center' },
+  modalButton:{ flex:1, backgroundColor:'#4CAF50', padding:12, margin:5, borderRadius:5, alignItems:'center', justifyContent:'center' },
+  modalButtonCancelar:{ flex:1, backgroundColor:'#888', padding:12, margin:5, borderRadius:5, alignItems:'center', justifyContent:'center' },
+
+  toastContainer:{
+    position:'absolute',
+    top:0,
+    alignSelf:'center',
+    backgroundColor:'white',
+    padding:15,
+    borderRadius:8,
+    width: width-40,
+    shadowColor:'#000',
+    shadowOffset:{ width:0, height:2 },
+    shadowOpacity:0.3,
+    shadowRadius:4,
+    elevation:5,
+    zIndex:1000
+  },
+  toastTitle:{ fontWeight:'bold', fontSize:16, marginBottom:5 },
+  toastDesc:{ fontSize:14, color:'#444' },
+
+  ordenacaoBtnGrande:{
+    backgroundColor:'#4CAF50',
+    paddingVertical:10,
+    borderRadius:5,
+    alignItems:'center',
+    marginBottom:10
+  },
+  ordenacaoBtnText:{
+    color:'white',
+    fontWeight:'bold',
+    fontSize:14
+  }
 });
