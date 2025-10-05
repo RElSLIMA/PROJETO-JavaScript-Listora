@@ -165,7 +165,14 @@ export default function EstoqueScreen() {
 
       <Text style={styles.total}>{tituloTotal}</Text>
 
-      <TextInput style={styles.busca} placeholder="Buscar produto..." value={busca} onChangeText={setBusca} />
+      <TextInput
+        style={styles.busca}
+        placeholder="Buscar produto..."
+        placeholderTextColor="#999"
+        value={busca}
+        onChangeText={setBusca}
+        color="#000"
+      />
 
       <TouchableOpacity style={styles.ordenacaoBtnGrande} onPress={alternarOrdenacao}>
         <Text style={styles.ordenacaoBtnText}>Ordenar: {textoOrdenacao()}</Text>
@@ -232,16 +239,31 @@ export default function EstoqueScreen() {
             <Text style={{ fontWeight:'bold', fontSize:18, marginBottom:10 }}>Editar Item</Text>
 
             <Text style={{ fontWeight:'bold', marginBottom:5 }}>Nome</Text>
-            <TextInput placeholder="Nome" value={novoNome} onChangeText={setNovoNome} style={styles.modalInput} />
+            <TextInput placeholder="Nome" placeholderTextColor="#999" value={novoNome} onChangeText={setNovoNome} style={styles.modalInput} color="#000" />
 
             <Text style={{ fontWeight:'bold', marginBottom:5 }}>Quantidade</Text>
-            <TextInput placeholder="Quantidade" value={novaQuantidade} onChangeText={setNovaQuantidade} keyboardType="numeric" style={styles.modalInput} />
+            <TextInput placeholder="Quantidade" placeholderTextColor="#999" value={novaQuantidade} onChangeText={setNovaQuantidade} keyboardType="numeric" style={styles.modalInput} color="#000" />
 
             <Text style={{ fontWeight:'bold', marginBottom:5 }}>Categoria</Text>
-            <Picker selectedValue={novaCategoria} onValueChange={setNovaCategoria} style={{ height:50, width:'100%', marginBottom:20 }}>
-              <Picker.Item label="Recorrente" value="recorrente"/>
-              <Picker.Item label="Esporádico" value="esporadico"/>
-            </Picker>
+            <View style={{ flexDirection:'row', justifyContent:'space-between', marginBottom:20 }}>
+              <TouchableOpacity
+                style={[styles.pickerButton, novaCategoria === 'recorrente' && styles.pickerSelected]}
+                onPress={() => setNovaCategoria('recorrente')}
+              >
+                <Text style={[styles.pickerText, novaCategoria === 'recorrente' && styles.pickerTextSelected]}>
+                  Recorrente
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.pickerButton, novaCategoria === 'esporadico' && styles.pickerSelected]}
+                onPress={() => setNovaCategoria('esporadico')}
+              >
+                <Text style={[styles.pickerText, novaCategoria === 'esporadico' && styles.pickerTextSelected]}>
+                  Esporádico
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={styles.modalButtonZerar} onPress={zerarEstoque}>
               <Text style={styles.buttonText}>Zerar Estoque</Text>
@@ -276,6 +298,7 @@ export default function EstoqueScreen() {
           </View>
         </View>
       </Modal>
+
     </View>
   );
 }
@@ -283,13 +306,13 @@ export default function EstoqueScreen() {
 const styles = StyleSheet.create({
   container:{ flex:1, padding:20 },
   total:{ fontSize:16, fontWeight:'bold', marginBottom:10 },
-  busca:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
+  busca:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginBottom:10, backgroundColor:'#fff', color:'#000' },
   filtroRow:{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 },
   filtroBtn:{ flex:1, paddingVertical:10, borderWidth:1, borderColor:'#ccc', borderRadius:5, marginHorizontal:5, alignItems:'center' },
   filtroAtivo:{ backgroundColor:'#4CAF50', borderColor:'#4CAF50' },
   emptyContainer:{ flex:1, justifyContent:'center', alignItems:'center' },
   empty:{ fontSize:18, color:'#666' },
-  item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:12 },
+  item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:12, backgroundColor:'#fff' },
   itemText:{ fontSize:16 },
   buttonsRow:{ flexDirection:'row', justifyContent:'space-between', marginTop:10 },
   smallButtonEditar:{ flex:1, backgroundColor:'#2196F3', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginHorizontal:5 },
@@ -298,7 +321,7 @@ const styles = StyleSheet.create({
   buttonText:{ color:'white', fontWeight:'bold', textAlign:'center' },
   modalBackground:{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.5)' },
   modalContainer:{ width:'85%', backgroundColor:'white', padding:20, borderRadius:10 },
-  modalInput:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
+  modalInput:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginBottom:10, backgroundColor:'#fff', color:'#000' },
   modalButton:{ flex:1, backgroundColor:'#4CAF50', padding:12, margin:5, borderRadius:5, alignItems:'center', justifyContent:'center' },
   modalButtonCancelar:{ flex:1, backgroundColor:'#888', padding:12, margin:5, borderRadius:5, alignItems:'center', justifyContent:'center' },
   modalButtonZerar:{ width:'100%', backgroundColor:'#2196F3', padding:12, borderRadius:5, alignItems:'center', justifyContent:'center', marginBottom:10 },
@@ -333,5 +356,17 @@ const styles = StyleSheet.create({
     color:'white',
     fontWeight:'bold',
     fontSize:14
-  }
+  },
+  pickerButton:{
+    flex:1,
+    padding:12,
+    borderWidth:1,
+    borderColor:'#ccc',
+    borderRadius:8,
+    alignItems:'center',
+    marginHorizontal:5
+  },
+  pickerSelected:{ backgroundColor:'#4CAF50', borderColor:'#4CAF50' },
+  pickerText:{ fontSize:14 },
+  pickerTextSelected:{ color:'white', fontWeight:'bold' }
 });

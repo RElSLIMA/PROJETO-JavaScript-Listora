@@ -98,17 +98,21 @@ export default function AdicionarProdutoScreen() {
         <TextInput
           style={styles.input}
           placeholder="Ex: Margarina, Arroz, Feijão..."
+          placeholderTextColor="#999999"
           value={nome}
           onChangeText={setNome}
+          color="#000"
         />
 
         <Text style={styles.label}>Quantidade</Text>
         <TextInput
           style={styles.input}
           placeholder="0"
+          placeholderTextColor="#999999"
           value={quantidade}
           onChangeText={text => setQuantidade(text.replace(/\D/g,''))}
           keyboardType="numeric"
+          color="#000"
         />
         <Text style={styles.infoText}>ℹ️ Quantidade 0 → Lista | Maior que 0 → Estoque</Text>
 
@@ -165,9 +169,18 @@ export default function AdicionarProdutoScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:{ flex:1, padding:20 },
+  container:{ flex:1, padding:20, backgroundColor:'#f7f7f7' },
   label:{ fontWeight:'bold', fontSize:14, marginBottom:5 },
-  input:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
+  input:{ 
+    borderWidth:1, 
+    borderColor:'#ccc', 
+    borderRadius:8, 
+    padding:12, 
+    marginBottom:10, 
+    backgroundColor:'#fff', 
+    color:'#000',
+    fontSize:14
+  },
   infoText:{ fontSize:12, color:'#666', marginBottom:15 },
   pickerContainer:{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 },
   pickerButton:{ 
@@ -179,13 +192,13 @@ const styles = StyleSheet.create({
     alignItems:'center'
   },
   pickerSelected:{ backgroundColor:'#4CAF50', borderColor:'#4CAF50' },
-  pickerText:{ fontSize:14 },
+  pickerText:{ fontSize:14, color:'#000' },
   pickerTextSelected:{ color:'white', fontWeight:'bold' },
   button:{ backgroundColor:'#4CAF50', padding:15, borderRadius:8, alignItems:'center', marginBottom:20 },
   buttonText:{ color:'white', fontWeight:'bold', fontSize:16 },
   historicoTitle:{ fontWeight:'bold', fontSize:16, marginBottom:10 },
   empty:{ color:'#666', fontStyle:'italic', marginBottom:10 },
-  historicoItem:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
+  historicoItem:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10, backgroundColor:'#fff' },
   itemNome: { fontWeight:'bold', fontSize:18, marginBottom:4 },
   itemInfo: { fontSize:14, color:'#444' },
 

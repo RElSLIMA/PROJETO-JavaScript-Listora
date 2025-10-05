@@ -170,8 +170,10 @@ export default function ListaCompraScreen() {
         <TextInput
           style={styles.busca}
           placeholder="Buscar produto..."
+          placeholderTextColor="#999999"
           value={busca}
           onChangeText={setBusca}
+          color="#000"
         />
 
         <TouchableOpacity style={styles.ordenacaoBtnGrande} onPress={alternarOrdenacao}>
@@ -185,7 +187,7 @@ export default function ListaCompraScreen() {
               style={[styles.filtroBtn, filtro===f && styles.filtroAtivo]}
               onPress={()=>setFiltro(f)}
             >
-              <Text style={filtro===f ? { color:'white', fontWeight:'bold' } : {}}>
+              <Text style={filtro===f ? { color:'white', fontWeight:'bold' } : { color:'#000' }}>
                 {f==='todos'?'Todos':f==='recorrente'?'Recorrente':'Esporádico'}
               </Text>
             </TouchableOpacity>
@@ -213,10 +215,10 @@ export default function ListaCompraScreen() {
                 </Text>
 
                 <View style={{ flexDirection:'row', justifyContent:'space-between', marginTop:8 }}>
-                  <TouchableOpacity style={[styles.smallButtonExcluir]} onPress={()=>removerItem(item)}>
+                  <TouchableOpacity style={styles.smallButtonExcluir} onPress={()=>removerItem(item)}>
                     <Text style={styles.buttonText}>Remover</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.button]} onPress={()=>abrirModalCompra(item)}>
+                  <TouchableOpacity style={styles.button} onPress={()=>abrirModalCompra(item)}>
                     <Text style={styles.buttonText}>Comprado</Text>
                   </TouchableOpacity>
                 </View>
@@ -233,31 +235,43 @@ export default function ListaCompraScreen() {
         >
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
-              <Text style={{ fontWeight:'bold', fontSize:18 }}>
+              <Text style={{ fontWeight:'bold', fontSize:18, marginBottom:10 }}>
                 Registrar Compra: {itemSelecionado?.nome}
               </Text>
+
+              <Text style={{ fontWeight:'bold', marginBottom:5 }}>Quantidade</Text>
               <TextInput
-                placeholder="Quantidade"
+                placeholder="0"
+                placeholderTextColor="#999999"
                 keyboardType="numeric"
                 value={quantidadeCompra}
                 onChangeText={setQuantidadeCompra}
                 style={styles.modalInput}
+                color="#000"
               />
+
+              <Text style={{ fontWeight:'bold', marginBottom:5 }}>Valor unitário (opcional)</Text>
               <TextInput
-                placeholder="Valor unitário (opcional)"
+                placeholder="R$ 0,00"
+                placeholderTextColor="#999999"
                 keyboardType="numeric"
                 value={valorCompra}
                 onChangeText={handleValorCompraChange}
                 style={styles.modalInput}
+                color="#000"
               />
+
               <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
                 <TouchableOpacity
-                  style={[styles.modalButtonCancelar]}
+                  style={styles.modalButtonCancelar}
                   onPress={cancelarCompra}
                 >
                   <Text style={styles.buttonText}>Cancelar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.modalButton} onPress={confirmarCompra}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={confirmarCompra}
+                >
                   <Text style={styles.buttonText}>Salvar</Text>
                 </TouchableOpacity>
               </View>
@@ -271,21 +285,24 @@ export default function ListaCompraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:{ flex:1, padding:20 },
-  busca:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginBottom:10 },
+  container:{ flex:1, padding:20, backgroundColor:'#f7f7f7' },
+  busca:{ 
+    borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginBottom:10,
+    backgroundColor:'#fff', color:'#000', fontSize:14
+  },
   filtroRow:{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 },
-  filtroBtn:{ flex:1, paddingVertical:10, borderWidth:1, borderColor:'#ccc', borderRadius:5, marginHorizontal:5, alignItems:'center' },
+  filtroBtn:{ flex:1, paddingVertical:10, borderWidth:1, borderColor:'#ccc', borderRadius:5, marginHorizontal:5, alignItems:'center', backgroundColor:'#fff' },
   filtroAtivo:{ backgroundColor:'#4CAF50', borderColor:'#4CAF50'},
   emptyContainer:{ flex:1, justifyContent:'center', alignItems:'center' },
   empty:{ fontSize:18, color:'#666' },
-  item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:12 },
-  itemText:{ fontSize:16 },
+  item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:12, backgroundColor:'#fff' },
+  itemText:{ fontSize:16, color:'#000' },
   button:{ flex:1, backgroundColor:'#4CAF50', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginLeft:5 },
   smallButtonExcluir:{ flex:1, backgroundColor:'#f44336', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginRight:5 },
   buttonText:{ color:'white', fontWeight:'bold', textAlign:'center' },
   modalBackground:{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.5)' },
   modalContainer:{ width:width-40, backgroundColor:'white', padding:20, borderRadius:10 },
-  modalInput:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, marginVertical:10 },
+  modalInput:{ borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginVertical:10, backgroundColor:'#fff', color:'#000', fontSize:14 },
   modalButton:{ flex:1, backgroundColor:'#4CAF50', padding:12, margin:5, borderRadius:5, alignItems:'center', justifyContent:'center' },
   modalButtonCancelar:{ flex:1, backgroundColor:'#888', padding:12, margin:5, borderRadius:5, alignItems:'center', justifyContent:'center' },
 

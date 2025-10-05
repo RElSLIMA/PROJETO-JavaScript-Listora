@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "PROJETO-JavaScript-Listora",
-    "slug": "PROJETO-JavaScript-Listora",
-    "version": "1.0.0",
+    "name": "Listora",
+    "slug": "Listora",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,10 +20,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.reislima.PROJETOJavaScriptListora"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "93ea8a1d-48c1-48b2-bb03-b6e7619e2bc4"
+      }
     }
   }
 }

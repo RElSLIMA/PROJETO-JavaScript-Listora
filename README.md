@@ -43,7 +43,7 @@ PROJETO-JavaScript-Listora/
 - ✅ **Sprint 1** — Funcionalidade inicial: CRUD de itens localmente.  
 - ✅ **Sprint 2** — Ajustes e melhorias gerais.  
 - ✅ **Sprint 3** — Otimizações finais no código, padronização visual e refinamento da navegação.  
-- 🔧 **Sprint 4** — Geração do APK e testes em dispositivos reais.  
+- ✅ **Sprint 4** — Geração do APK e testes em dispositivos reais.  
 - 🔧 **Sprint 5** — Criação da documentação técnica e guia de uso.  
 
 ---
