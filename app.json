@@ -2,7 +2,7 @@
   "expo": {
     "name": "Listora",
     "slug": "Listora",
-    "version": "1.0.1",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -21,6 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "pan",
       "package": "com.reislima.PROJETOJavaScriptListora"
     },
     "web": {

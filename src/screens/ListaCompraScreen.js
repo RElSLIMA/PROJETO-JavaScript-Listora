@@ -233,50 +233,55 @@ export default function ListaCompraScreen() {
           animationType="fade"
           onRequestClose={cancelarCompra}
         >
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <Text style={{ fontWeight:'bold', fontSize:18, marginBottom:10 }}>
-                Registrar Compra: {itemSelecionado?.nome}
-              </Text>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          >
+            <View style={styles.modalBackground}>
+              <View style={styles.modalContainer}>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>
+                  Registrar Compra: {itemSelecionado?.nome}
+                </Text>
 
-              <Text style={{ fontWeight:'bold', marginBottom:5 }}>Quantidade</Text>
-              <TextInput
-                placeholder="0"
-                placeholderTextColor="#999999"
-                keyboardType="numeric"
-                value={quantidadeCompra}
-                onChangeText={setQuantidadeCompra}
-                style={styles.modalInput}
-                color="#000"
-              />
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Quantidade</Text>
+                <TextInput
+                  placeholder="0"
+                  placeholderTextColor="#999999"
+                  keyboardType="numeric"
+                  value={quantidadeCompra}
+                  onChangeText={setQuantidadeCompra}
+                  style={styles.modalInput}
+                  color="#000"
+                />
 
-              <Text style={{ fontWeight:'bold', marginBottom:5 }}>Valor unitário (opcional)</Text>
-              <TextInput
-                placeholder="R$ 0,00"
-                placeholderTextColor="#999999"
-                keyboardType="numeric"
-                value={valorCompra}
-                onChangeText={handleValorCompraChange}
-                style={styles.modalInput}
-                color="#000"
-              />
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Valor unitário (opcional)</Text>
+                <TextInput
+                  placeholder="R$ 0,00"
+                  placeholderTextColor="#999999"
+                  keyboardType="numeric"
+                  value={valorCompra}
+                  onChangeText={handleValorCompraChange}
+                  style={styles.modalInput}
+                  color="#000"
+                />
 
-              <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
-                <TouchableOpacity
-                  style={styles.modalButtonCancelar}
-                  onPress={cancelarCompra}
-                >
-                  <Text style={styles.buttonText}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={confirmarCompra}
-                >
-                  <Text style={styles.buttonText}>Salvar</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <TouchableOpacity
+                    style={styles.modalButtonCancelar}
+                    onPress={cancelarCompra}
+                  >
+                    <Text style={styles.buttonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={confirmarCompra}
+                  >
+                    <Text style={styles.buttonText}>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
 
       </View>

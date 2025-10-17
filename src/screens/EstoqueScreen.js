@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { 
-  View, Text, FlatList, TouchableOpacity, TextInput, Modal, StyleSheet, Dimensions, Animated 
+  View, Text, FlatList, TouchableOpacity, TextInput, Modal, StyleSheet, Dimensions, Animated,
+  KeyboardAvoidingView, Platform, ScrollView
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { getAllItems, updateItem, deleteItem } from '../services/db';
@@ -234,51 +235,103 @@ export default function EstoqueScreen() {
       )}
 
       <Modal visible={modalEditar} transparent animationType="slide">
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={{ fontWeight:'bold', fontSize:18, marginBottom:10 }}>Editar Item</Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>
+                Editar Item
+              </Text>
 
-            <Text style={{ fontWeight:'bold', marginBottom:5 }}>Nome</Text>
-            <TextInput placeholder="Nome" placeholderTextColor="#999" value={novoNome} onChangeText={setNovoNome} style={styles.modalInput} color="#000" />
-
-            <Text style={{ fontWeight:'bold', marginBottom:5 }}>Quantidade</Text>
-            <TextInput placeholder="Quantidade" placeholderTextColor="#999" value={novaQuantidade} onChangeText={setNovaQuantidade} keyboardType="numeric" style={styles.modalInput} color="#000" />
-
-            <Text style={{ fontWeight:'bold', marginBottom:5 }}>Categoria</Text>
-            <View style={{ flexDirection:'row', justifyContent:'space-between', marginBottom:20 }}>
-              <TouchableOpacity
-                style={[styles.pickerButton, novaCategoria === 'recorrente' && styles.pickerSelected]}
-                onPress={() => setNovaCategoria('recorrente')}
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Text style={[styles.pickerText, novaCategoria === 'recorrente' && styles.pickerTextSelected]}>
-                  Recorrente
-                </Text>
-              </TouchableOpacity>
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Nome</Text>
+                <TextInput
+                  placeholder="Nome"
+                  placeholderTextColor="#999"
+                  value={novoNome}
+                  onChangeText={setNovoNome}
+                  style={styles.modalInput}
+                  color="#000"
+                />
 
-              <TouchableOpacity
-                style={[styles.pickerButton, novaCategoria === 'esporadico' && styles.pickerSelected]}
-                onPress={() => setNovaCategoria('esporadico')}
-              >
-                <Text style={[styles.pickerText, novaCategoria === 'esporadico' && styles.pickerTextSelected]}>
-                  Esporádico
-                </Text>
-              </TouchableOpacity>
-            </View>
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Quantidade</Text>
+                <TextInput
+                  placeholder="Quantidade"
+                  placeholderTextColor="#999"
+                  value={novaQuantidade}
+                  onChangeText={setNovaQuantidade}
+                  keyboardType="numeric"
+                  style={styles.modalInput}
+                  color="#000"
+                />
 
-            <TouchableOpacity style={styles.modalButtonZerar} onPress={zerarEstoque}>
-              <Text style={styles.buttonText}>Zerar Estoque</Text>
-            </TouchableOpacity>
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Categoria</Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 20,
+                  }}
+                >
+                  <TouchableOpacity
+                    style={[
+                      styles.pickerButton,
+                      novaCategoria === 'recorrente' && styles.pickerSelected,
+                    ]}
+                    onPress={() => setNovaCategoria('recorrente')}
+                  >
+                    <Text
+                      style={[
+                        styles.pickerText,
+                        novaCategoria === 'recorrente' && styles.pickerTextSelected,
+                      ]}
+                    >
+                      Recorrente
+                    </Text>
+                  </TouchableOpacity>
 
-            <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
-              <TouchableOpacity style={styles.modalButtonCancelar} onPress={()=>setModalEditar(false)}>
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={confirmarEditar}>
-                <Text style={styles.buttonText}>Salvar</Text>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.pickerButton,
+                      novaCategoria === 'esporadico' && styles.pickerSelected,
+                    ]}
+                    onPress={() => setNovaCategoria('esporadico')}
+                  >
+                    <Text
+                      style={[
+                        styles.pickerText,
+                        novaCategoria === 'esporadico' && styles.pickerTextSelected,
+                      ]}
+                    >
+                      Esporádico
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity style={styles.modalButtonZerar} onPress={zerarEstoque}>
+                  <Text style={styles.buttonText}>Zerar Estoque</Text>
+                </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <TouchableOpacity
+                    style={styles.modalButtonCancelar}
+                    onPress={() => setModalEditar(false)}
+                  >
+                    <Text style={styles.buttonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.modalButton} onPress={confirmarEditar}>
+                    <Text style={styles.buttonText}>Salvar</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={modalExcluir} transparent animationType="fade">
