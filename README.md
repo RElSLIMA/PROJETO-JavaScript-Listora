@@ -72,8 +72,7 @@ PROJETO-JavaScript-Listora/
 ## 🧱 Arquitetura e Decisões Técnicas
 
 - Utilização do padrão **Screens + Services**, separando a lógica de interface da lógica de dados.  
-- Uso do **AsyncStorage** para persistência local, garantindo funcionamento offline sem dependência de banco de dados externo.  
-- Animações suaves e responsivas com **Animated API**.  
+- Uso do **AsyncStorage** para persistência local, garantindo funcionamento offline sem dependência de banco de dados externo.   
 - Estrutura modular, facilitando manutenção e expansão futura.  
 - Uso de **Expo CLI** para build e empacotamento do aplicativo (APK).  
 
