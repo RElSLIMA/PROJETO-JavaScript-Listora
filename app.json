@@ -2,7 +2,7 @@
   "expo": {
     "name": "Listora",
     "slug": "Listora",
-    "version": "1.0.5",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

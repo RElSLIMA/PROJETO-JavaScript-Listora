@@ -15,7 +15,8 @@ const gerarId = () => Date.now().toString() + Math.floor(Math.random() * 1000);
 
 export const addItem = async ({
   nome,
-  quantidade = 0,
+  quantidade_total = 0,
+  quantidade_lista = 0,
   valorUnitario = null,
   categoria = 'recorrente',
   naLista = false,
@@ -27,9 +28,16 @@ export const addItem = async ({
   }
 
   const id = gerarId();
-  const naListaFinal = quantidade === 0 || quantidade === null;
+  const novoItem = {
+    id,
+    nome,
+    quantidade_total: quantidade_total || 0,
+    quantidade_lista: quantidade_lista,
+    valorUnitario,
+    categoria,
+    naLista,
+  };
 
-  const novoItem = { id, nome, quantidade, valorUnitario, categoria, naLista: naListaFinal };
   itens.push(novoItem);
 
   await AsyncStorage.setItem(ITENS_KEY, JSON.stringify(itens));
@@ -49,26 +57,12 @@ export const getAllItems = async () => {
   });
 };
 
-export const updateItem = async (id, { nome, quantidade, categoria, naLista }) => {
+export const updateItem = async (id, updates) => {
   const itens = JSON.parse(await AsyncStorage.getItem(ITENS_KEY)) || [];
   const index = itens.findIndex(i => i.id === id);
   if (index === -1) throw new Error('Item não encontrado');
 
-  if (nome !== undefined) {
-    const nomeExistente = itens.some(
-      (item, i) => i !== index && item.nome.toLowerCase() === nome.toLowerCase()
-    );
-    if (nomeExistente) throw new Error('Já existe outro item com esse nome');
-  }
-
-  itens[index] = {
-    ...itens[index],
-    ...(nome !== undefined ? { nome } : {}),
-    ...(quantidade !== undefined ? { quantidade } : {}),
-    ...(categoria !== undefined ? { categoria } : {}),
-    ...(naLista !== undefined ? { naLista } : {}),
-  };
-
+  itens[index] = { ...itens[index], ...updates };
   await AsyncStorage.setItem(ITENS_KEY, JSON.stringify(itens));
 };
 
@@ -81,8 +75,10 @@ export const registrarCompra = async (itemId, quantidadeComprada, valorUnitario 
   const index = itens.findIndex(i => i.id === itemId);
   if (index === -1) throw new Error('Item não encontrado');
 
-  itens[index].quantidade = (itens[index].quantidade || 0) + quantidadeComprada;
+  itens[index].quantidade_total = (itens[index].quantidade_total || 0) + quantidadeComprada;
+  itens[index].quantidade_lista = 0;
   itens[index].naLista = false;
+
   await AsyncStorage.setItem(ITENS_KEY, JSON.stringify(itens));
 
   compras.push({
@@ -113,6 +109,6 @@ export const limparTudo = async () => {
 
 export const limparListaCompras = async () => {
   const itens = JSON.parse(await AsyncStorage.getItem(ITENS_KEY)) || [];
-  const itensAtualizados = itens.map(i => ({ ...i, naLista: false }));
+  const itensAtualizados = itens.map(i => ({ ...i, naLista: false, quantidade_lista: 0 }));
   await AsyncStorage.setItem(ITENS_KEY, JSON.stringify(itensAtualizados));
 };

@@ -3,7 +3,6 @@ import {
   View, Text, FlatList, TouchableOpacity, TextInput, Modal, StyleSheet, Dimensions, Animated,
   KeyboardAvoidingView, Platform, ScrollView
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { getAllItems, updateItem, deleteItem } from '../services/db';
 
 const { width } = Dimensions.get('window');
@@ -18,7 +17,7 @@ export default function EstoqueScreen() {
   const [itemExcluir, setItemExcluir] = useState(null);
   const [novoNome, setNovoNome] = useState('');
   const [novaCategoria, setNovaCategoria] = useState('recorrente');
-  const [novaQuantidade, setNovaQuantidade] = useState('0');
+  const [novaQuantidadeTotal, setNovaQuantidadeTotal] = useState('0');
 
   const [toastVisible, setToastVisible] = useState(false);
   const [toastTitle, setToastTitle] = useState('');
@@ -70,7 +69,7 @@ export default function EstoqueScreen() {
     if (ordenacao === 3) return b.nome.localeCompare(a.nome);
   });
 
-  const totalItens = itensFiltrados.reduce((acc, i)=> acc + i.quantidade, 0);
+  const totalItens = itensFiltrados.reduce((acc, i)=> acc + (i.quantidade_total || 0), 0);
   const tituloTotal = filtro==='todos'
     ? `Total de produtos no estoque: ${totalItens}`
     : `Total de produtos ${filtro==='recorrente'?'recorrentes':'esporádicos'}: ${totalItens}`;
@@ -95,7 +94,7 @@ export default function EstoqueScreen() {
     setItemEditar(item);
     setNovoNome(item.nome);
     setNovaCategoria(item.categoria);
-    setNovaQuantidade(item.quantidade.toString());
+    setNovaQuantidadeTotal(item.quantidade_total?.toString() || '0');
     setModalEditar(true);
   };
 
@@ -106,7 +105,7 @@ export default function EstoqueScreen() {
       return; 
     }
 
-    const quantidadeNum = parseInt(novaQuantidade);
+    const quantidadeNum = parseInt(novaQuantidadeTotal);
     if (isNaN(quantidadeNum) || quantidadeNum < 0) { 
       setModalEditar(false);
       showToast('Erro', 'Quantidade inválida'); 
@@ -114,7 +113,11 @@ export default function EstoqueScreen() {
     }
 
     try {
-      await updateItem(itemEditar.id, { nome: novoNome, categoria: novaCategoria, quantidade: quantidadeNum });
+      await updateItem(itemEditar.id, { 
+        nome: novoNome, 
+        categoria: novaCategoria, 
+        quantidade_total: quantidadeNum 
+      });
       setModalEditar(false);
       showToast('Sucesso', `${novoNome} atualizado`);
       loadItens();
@@ -130,7 +133,7 @@ export default function EstoqueScreen() {
   };
 
   const zerarEstoque = async () => {
-    await updateItem(itemEditar.id, { quantidade:0 });
+    await updateItem(itemEditar.id, { quantidade_total: 0 });
     setModalEditar(false);
     showToast('Sucesso', `${itemEditar.nome} teve seu estoque zerado`);
     loadItens();
@@ -201,10 +204,10 @@ export default function EstoqueScreen() {
           keyExtractor={item=>item.id}
           renderItem={({item})=>(
             <View style={styles.item}>
-              <Text style={[styles.itemText, { fontWeight:'bold', fontSize:18, marginBottom:4 }]}>{item.nome}</Text>
+              <Text style={[styles.itemText, { fontWeight:'bold', fontSize:22, marginBottom:4 }]}>{item.nome}</Text>
               <Text style={{ marginBottom:4 }}><Text style={{ fontWeight:'bold' }}>Categoria: </Text>{formatarCategoria(item.categoria)}</Text>
               <Text style={{ marginBottom:8 }}><Text style={{ fontWeight:'bold' }}>Valor: </Text>{item.minValor != null && item.maxValor != null ? `R$ ${item.minValor.toFixed(2)} - R$ ${item.maxValor.toFixed(2)}` : 'Sem registro de valor'}</Text>
-              <Text style={{ marginBottom:8 }}><Text style={{ fontWeight:'bold' }}>Quantidade: </Text>{item.quantidade}</Text>
+              <Text style={{ marginBottom:8 }}><Text style={{ fontWeight:'bold' }}>Quantidade: </Text>{item.quantidade_total ?? 0}</Text>
 
               <View style={styles.buttonsRow}>
                 <TouchableOpacity
@@ -259,12 +262,12 @@ export default function EstoqueScreen() {
                   color="#000"
                 />
 
-                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Quantidade</Text>
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Quantidade total</Text>
                 <TextInput
-                  placeholder="Quantidade"
+                  placeholder="Quantidade total"
                   placeholderTextColor="#999"
-                  value={novaQuantidade}
-                  onChangeText={setNovaQuantidade}
+                  value={novaQuantidadeTotal}
+                  onChangeText={setNovaQuantidadeTotal}
                   keyboardType="numeric"
                   style={styles.modalInput}
                   color="#000"

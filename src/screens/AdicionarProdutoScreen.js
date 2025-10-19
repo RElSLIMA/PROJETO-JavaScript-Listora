@@ -11,6 +11,7 @@ export default function AdicionarProdutoScreen() {
   const [nome, setNome] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [categoria, setCategoria] = useState('recorrente');
+  const [local, setLocal] = useState('lista');
   const [historico, setHistorico] = useState([]);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -48,8 +49,9 @@ export default function AdicionarProdutoScreen() {
       return;
     }
 
-    const quantidadeNum = quantidade === '' ? 0 : parseInt(quantidade);
-    if (isNaN(quantidadeNum) || quantidadeNum < 0) {
+    const quantidadeNum = quantidade === '' ? 1 : parseInt(quantidade);
+
+    if (isNaN(quantidadeNum) || (local === 'lista' && quantidadeNum < 1)) {
       showModal('Erro', <Text>Quantidade inválida</Text>);
       return;
     }
@@ -57,12 +59,13 @@ export default function AdicionarProdutoScreen() {
     try {
       await addItem({
         nome,
-        quantidade: quantidadeNum,
         categoria,
-        naLista: false,
+        naLista: local === 'lista',
+        quantidade_total: local === 'estoque' ? quantidadeNum : 0,
+        quantidade_lista: local === 'lista' ? quantidadeNum : 0,
       });
 
-      const destino = quantidadeNum === 0 ? "Lista de Compras" : "Estoque";
+      const destino = local === 'lista' ? "Lista de Compras" : "Estoque";
       showModal(
         'Produto adicionado!',
         <Text>
@@ -70,11 +73,18 @@ export default function AdicionarProdutoScreen() {
         </Text>
       );
 
-      setHistorico([{ nome, quantidade: quantidadeNum, categoria }, ...historico]);
+      setHistorico([{ 
+        nome, 
+        categoria, 
+        naLista: local === 'lista', 
+        quantidade_total: local === 'estoque' ? quantidadeNum : 0,
+        quantidade_lista: local === 'lista' ? quantidadeNum : 0
+      }, ...historico]);
 
       setNome('');
       setQuantidade('');
       setCategoria('recorrente');
+      setLocal('lista');
     } catch (e) {
       showModal('Erro', <Text>{e.message}</Text>);
     }
@@ -107,14 +117,13 @@ export default function AdicionarProdutoScreen() {
         <Text style={styles.label}>Quantidade</Text>
         <TextInput
           style={styles.input}
-          placeholder="0"
+          placeholder="1"
           placeholderTextColor="#999999"
           value={quantidade}
           onChangeText={text => setQuantidade(text.replace(/\D/g,''))}
           keyboardType="numeric"
           color="#000"
         />
-        <Text style={styles.infoText}>ℹ️ Quantidade 0 → Lista | Maior que 0 → Estoque</Text>
 
         <Text style={styles.label}>Frequência de Compra</Text>
         <View style={styles.pickerContainer}>
@@ -137,6 +146,24 @@ export default function AdicionarProdutoScreen() {
             : 'ℹ️ Produtos que você não compra com frequência'}
         </Text>
 
+        <Text style={styles.label}>Local do Produto</Text>
+        <View style={styles.pickerContainer}>
+          <TouchableOpacity 
+            style={[styles.pickerButton, local==='lista' && styles.pickerSelected]} 
+            onPress={() => setLocal('lista')}
+          >
+            <Text style={[styles.pickerText, local==='lista' && styles.pickerTextSelected]}>Lista de Compras</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.pickerButton, local==='estoque' && styles.pickerSelected]} 
+            onPress={() => setLocal('estoque')}
+          >
+            <Text style={[styles.pickerText, local==='estoque' && styles.pickerTextSelected]}>Estoque</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ height: 15 }} />
+
         <TouchableOpacity style={styles.button} onPress={handleAdd}>
           <Text style={styles.buttonText}>Adicionar</Text>
         </TouchableOpacity>
@@ -150,12 +177,13 @@ export default function AdicionarProdutoScreen() {
             keyExtractor={(item,index) => index.toString()}
             style={{maxHeight:300}}
             renderItem={({item}) => {
-              const destino = item.quantidade === 0 ? "Lista de Compras" : "Estoque";
+              const destino = item.naLista ? "Lista de Compras" : "Estoque";
+              const quantidadeExibir = item.naLista ? item.quantidade_lista : item.quantidade_total;
               return (
                 <View style={styles.historicoItem}>
                   <Text style={styles.itemNome}>🛒 <Text style={{fontWeight:'bold'}}>{item.nome}</Text></Text>
                   <Text style={styles.itemInfo}>
-                    Qtd: {item.quantidade}  •  {item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}  •  {destino}
+                    Qtd: {quantidadeExibir}  •  {item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}  •  {destino}
                   </Text>
                 </View>
               );

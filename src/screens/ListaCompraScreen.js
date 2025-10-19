@@ -22,7 +22,6 @@ export default function ListaCompraScreen() {
   const [busca, setBusca] = useState('');
   const [modalCompraVisible, setModalCompraVisible] = useState(false);
   const [itemSelecionado, setItemSelecionado] = useState(null);
-  const [quantidadeCompra, setQuantidadeCompra] = useState('');
   const [valorCompra, setValorCompra] = useState('');
 
   const [ordenacao, setOrdenacao] = useState(0);
@@ -55,7 +54,10 @@ export default function ListaCompraScreen() {
   const loadItens = async () => {
     const all = await getAllItems();
     const listaCompra = all.filter(i => i.naLista === true);
-    setItens(listaCompra);
+    setItens(listaCompra.map(i => ({
+      ...i,
+      quantidadeSelecionada: i.quantidade_lista > 0 ? i.quantidade_lista : 1
+    })));
   };
 
   useEffect(() => { loadItens(); }, []);
@@ -80,7 +82,6 @@ export default function ListaCompraScreen() {
 
   const abrirModalCompra = (item) => {
     setItemSelecionado(item);
-    setQuantidadeCompra('');
     setValorCompra('');
     setModalCompraVisible(true);
   };
@@ -98,27 +99,24 @@ export default function ListaCompraScreen() {
   };
 
   const confirmarCompra = async () => {
-    if (!itemSelecionado) {
-      setModalCompraVisible(false);
-      showToast('Erro', <Text>Nenhum item selecionado</Text>);
-      return;
-    }
+    if (!itemSelecionado) return;
 
-    const quantidadeNum = parseInt(quantidadeCompra);
-    if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
-      setModalCompraVisible(false);
-      showToast('Erro', <Text>Quantidade inválida</Text>);
-      return;
-    }
+    const valorNum = valorCompra.trim() === ''
+      ? null
+      : parseFloat(valorCompra.replace(/\D/g, '')) / 100;
 
-    const valorNum = valorCompra ? parseFloat(valorCompra.replace(/\D/g,''))/100 : 0;
+    const quantidade = itemSelecionado.quantidadeSelecionada || 1;
 
     try {
-      await registrarCompra(itemSelecionado.id, quantidadeNum, valorNum);
+      await registrarCompra(itemSelecionado.id, quantidade, valorNum);
       setModalCompraVisible(false);
-      showToast('Sucesso!', <Text>Produto <Text style={{fontWeight:'bold'}}>{itemSelecionado.nome}</Text> comprado.</Text>);
+      showToast(
+        'Sucesso!',
+        <Text>
+          Produto <Text style={{ fontWeight: 'bold' }}>{itemSelecionado.nome}</Text> comprado.
+        </Text>
+      );
       setItemSelecionado(null);
-      setQuantidadeCompra('');
       setValorCompra('');
       loadItens();
     } catch (error) {
@@ -134,13 +132,33 @@ export default function ListaCompraScreen() {
 
   const removerItem = async (item) => {
     try {
-      await updateItem(item.id, { naLista:false });
-      loadItens();
-      showToast('Sucesso!', <Text>Produto <Text style={{fontWeight:'bold'}}>{item.nome}</Text> removido.</Text>);
+      await updateItem(item.id, { naLista: false, quantidade_lista: 1 });
+
+      await loadItens();
+
+      showToast(
+        'Sucesso!',
+        <Text>
+          Produto <Text style={{ fontWeight: 'bold' }}>{item.nome}</Text> removido da lista.
+        </Text>
+      );
     } catch (error) {
-      showToast('Erro', <Text>Não foi possível remover o item</Text>);
-      console.log(error);
+      showToast('Erro', <Text>Não foi possível remover o item.</Text>);
+      console.log('Erro ao remover item:', error);
     }
+  };
+
+  const alterarQuantidade = async (itemId, delta) => {
+    setItens(prev => prev.map(i => {
+      if (i.id === itemId) {
+        const novaQtd = Math.max(1, (i.quantidadeSelecionada || 1) + delta);
+
+        updateItem(itemId, { quantidade_lista: novaQtd }).catch(console.log);
+
+        return { ...i, quantidadeSelecionada: novaQtd };
+      }
+      return i;
+    }));
   };
 
   const alternarOrdenacao = () => setOrdenacao((ordenacao + 1) % 4);
@@ -204,7 +222,19 @@ export default function ListaCompraScreen() {
             keyExtractor={item=>item.id}
             renderItem={({ item }) => (
               <View style={styles.item}>
-                <Text style={[styles.itemText,{ fontWeight:'bold', fontSize:18 }]}>{item.nome}</Text>
+                <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center' }}>
+                  <Text style={[styles.itemText,{ fontWeight:'bold', fontSize:22 }]}>{item.nome}</Text>
+                  <View style={{ flexDirection:'row', alignItems:'center' }}>
+                    <TouchableOpacity style={styles.stepperBtn} onPress={()=>alterarQuantidade(item.id, -1)}>
+                      <Text style={styles.stepperText}>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.itemText}>{item.quantidadeSelecionada}</Text>
+                    <TouchableOpacity style={styles.stepperBtn} onPress={()=>alterarQuantidade(item.id, +1)}>
+                      <Text style={styles.stepperText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
                 <Text>
                   <Text style={{ fontWeight:'bold' }}>Categoria: </Text>
                   {item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1)}
@@ -242,17 +272,6 @@ export default function ListaCompraScreen() {
                 <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>
                   Registrar Compra: {itemSelecionado?.nome}
                 </Text>
-
-                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Quantidade</Text>
-                <TextInput
-                  placeholder="0"
-                  placeholderTextColor="#999999"
-                  keyboardType="numeric"
-                  value={quantidadeCompra}
-                  onChangeText={setQuantidadeCompra}
-                  style={styles.modalInput}
-                  color="#000"
-                />
 
                 <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Valor unitário (opcional)</Text>
                 <TextInput
@@ -302,6 +321,8 @@ const styles = StyleSheet.create({
   empty:{ fontSize:18, color:'#666' },
   item:{ padding:15, borderWidth:1, borderColor:'#ccc', borderRadius:8, marginBottom:12, backgroundColor:'#fff' },
   itemText:{ fontSize:16, color:'#000' },
+  stepperBtn:{ width:30, height:30, borderWidth:1, borderColor:'#ccc', borderRadius:5, alignItems:'center', justifyContent:'center', marginHorizontal:5 },
+  stepperText:{ fontSize:16, fontWeight:'bold' },
   button:{ flex:1, backgroundColor:'#4CAF50', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginLeft:5 },
   smallButtonExcluir:{ flex:1, backgroundColor:'#f44336', padding:10, borderRadius:5, alignItems:'center', justifyContent:'center', marginRight:5 },
   buttonText:{ color:'white', fontWeight:'bold', textAlign:'center' },
