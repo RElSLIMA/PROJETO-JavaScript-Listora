@@ -118,7 +118,7 @@ Desenvolvido por **Gabriel Reis**
 
 ## 📦 Versão Atual
 
-**Versão:** 1.0.1  
+**Versão:** 1.0.2  
 📅 *Última atualização:* Outubro de 2025  
 📝 *Novidades:* Ajustes visuais, correções de modal e geração do APK.  
 
