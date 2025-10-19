@@ -116,9 +116,9 @@ Desenvolvido por **Gabriel Reis**
 
 ## 📦 Versão Atual
 
-**Versão:** 1.0.2  
+**Versão:** 1.0.3  
 📅 *Última atualização:* Outubro de 2025  
-📝 *Novidades:* Ajustes visuais, correções de modal e geração do APK.  
+📝 *Novidades:* Retrabalho na exibição e controle de quantidade de itens no estoque e na lista de compras. 
 
 ---
 
