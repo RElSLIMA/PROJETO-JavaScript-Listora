@@ -65,7 +65,6 @@ PROJETO-JavaScript-Listora/
 | **Linguagem** | JavaScript (ES6+) |
 | **Controle de Versão** | Git e GitHub |
 | **Qualidade de Código** | ESLint, Prettier |
-| **Outros** | Animated API |
 
 ---
 
