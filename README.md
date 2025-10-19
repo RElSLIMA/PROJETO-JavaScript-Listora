@@ -65,15 +65,13 @@ PROJETO-JavaScript-Listora/
 | **Linguagem** | JavaScript (ES6+) |
 | **Controle de Versão** | Git e GitHub |
 | **Qualidade de Código** | ESLint, Prettier |
-| **Outros** | Animated API |
 
 ---
 
 ## 🧱 Arquitetura e Decisões Técnicas
 
 - Utilização do padrão **Screens + Services**, separando a lógica de interface da lógica de dados.  
-- Uso do **AsyncStorage** para persistência local, garantindo funcionamento offline sem dependência de banco de dados externo.  
-- Animações suaves e responsivas com **Animated API**.  
+- Uso do **AsyncStorage** para persistência local, garantindo funcionamento offline sem dependência de banco de dados externo.   
 - Estrutura modular, facilitando manutenção e expansão futura.  
 - Uso de **Expo CLI** para build e empacotamento do aplicativo (APK).  
 
@@ -118,7 +116,7 @@ Desenvolvido por **Gabriel Reis**
 
 ## 📦 Versão Atual
 
-**Versão:** 1.0.1  
+**Versão:** 1.0.2  
 📅 *Última atualização:* Outubro de 2025  
 📝 *Novidades:* Ajustes visuais, correções de modal e geração do APK.  
 
